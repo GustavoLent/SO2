@@ -1,0 +1,6 @@
+!<arch>
+ex1_f.c/        0           0     0     644     63        `
+// Use a flag -c no gcc para não linkar
+int f (){
+	return 3;
+}
