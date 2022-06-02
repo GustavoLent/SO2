@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <string.h>
+#include <ctype.h>
 
 /* Gera um processo filho executando um novo programa.
    PROGRAM � o nome do programa a ser executado; ele
@@ -47,17 +48,68 @@ void handleNewline(char *line, int len)
   }
 }
 
-int countWords(char *line)
+char *trimwhitespace(char *str)
 {
-  int count = 0;
+  char *end;
+
+  // Trim leading space
+  while (isspace((unsigned char)*str))
+    str++;
+
+  if (*str == 0) // All spaces?
+    return str;
+
+  // Trim trailing space
+  end = str + strlen(str) - 1;
+  while (end > str && isspace((unsigned char)*end))
+    end--;
+
+  // Write new null terminator character
+  end[1] = '\0';
+
+  return str;
+}
+
+void getWordsListSize(char *line, int *amountOfWords, int *biggestWord)
+{
+  int _amountOfWords = 0;
+  int _biggestWord = 0;
+  int currWordSizeCount = 0;
+  int foundSpace = 0;
+
   for (int i = 0; line[i] != '\0'; i++)
   {
+    if (line[i] == ' ' && foundSpace == 1)
+    {
+      continue; // skip consecutive spaces
+    }
+
     if (line[i] == ' ')
     {
-      count++;
+      foundSpace = 1;
+      _amountOfWords++;
+      if (currWordSizeCount > _biggestWord)
+      {
+        _biggestWord = currWordSizeCount;
+      }
+      currWordSizeCount = 0;
+    }
+    else
+    {
+      foundSpace = 0;
+      currWordSizeCount++;
     }
   }
-  return count;
+
+  if (currWordSizeCount > _biggestWord)
+  {
+    _biggestWord = currWordSizeCount;
+  }
+
+  *amountOfWords = _amountOfWords + 1; // one space = two words
+  *biggestWord = _biggestWord;
+
+  return;
 }
 
 char *getCommand(char *line)
@@ -94,13 +146,50 @@ int main()
 
     if (alocated_bytes > 0)
     {
-      handleNewline(line, chars_read);
-      handleExit(line);
 
-      int wordsQtd = countWords(line);
-      printf("words: %d\n", wordsQtd);
+      char *trimmed = trimwhitespace(line);
 
-      char *cmd = getCommand(line);
+      if (trimmed[0] == '\n' || trimmed[0] == '\0')
+      {
+        continue;
+      }
+
+      handleNewline(trimmed, chars_read);
+      handleExit(trimmed);
+
+      int amountOfWords, biggestWord;
+      getWordsListSize(line, &amountOfWords, &biggestWord);
+
+      char *words[amountOfWords + 1];
+      char toCut[strlen(line)];
+      strcpy(toCut, line);
+
+      char *firstToken = strtok(toCut, " ");
+      words[0] = (char *)malloc(strlen(firstToken));
+
+      strcpy(words[0], firstToken);
+      printf("%s\n", words[0]);
+
+      for (int i = 1; i < amountOfWords; i++)
+      {
+        char *token = strtok(NULL, " ");
+        words[i] = (char *)malloc(strlen(token));
+
+        strcpy(words[i], token);
+        // printf("%s\n", words[i]);
+      }
+
+      words[amountOfWords + 1] = NULL;
+
+      for (int i = 0; i <= amountOfWords; i++)
+      {
+        printf("%s\n", words[i]);
+      }
+
+      spawn(words[0], words);
+
+      // char *words = getWords(trimmed);
+      // printf("words: %d\n", words);
 
       // int value = atoi(line);
       // char arr[value];
