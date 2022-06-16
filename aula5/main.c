@@ -1,16 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
-
-/* Gera um processo filho executando um novo programa.
-   PROGRAM � o nome do programa a ser executado; ele
-   ser� buscado no path. ARG_LIST � uma lista terminada
-   em NULL de strings de caracteres a serem passados
-   como a lista de argumentos do programa. Retorna o id
-   do processo gerado.  */
 
 int spawn(char *program, char **arg_list)
 {
@@ -25,6 +19,9 @@ int spawn(char *program, char **arg_list)
   {
     /* Agora execute PROGRAM,  buscando-o no path.  */
     execvp(program, arg_list);
+    int status;
+    wait(&status);
+
     /* A fun��o execvp s� retorna se um erro ocorrer.  */
     fprintf(stderr, "um erro ocorreu em execvp\n");
     abort();
@@ -112,24 +109,8 @@ void getWordsListSize(char *line, int *amountOfWords, int *biggestWord)
   return;
 }
 
-char *getCommand(char *line)
-{
-  char str[strlen(line)];
-  strcpy(str, line);
-
-  return strtok(str, " ");
-}
-
 int main()
 {
-  /* A lista e argumentos para ser passada ao comando "ls".  */
-  char *arg_list[] = {
-      "ls", /* argv[0], o nome do programa.  */
-      "-l",
-      "/",
-      NULL /* A lista de argumentos deve ser terminada com NULL.  */
-  };
-
   char *pwd = getenv("PWD");
   char *line;
   size_t alocated_bytes = 0;
@@ -146,11 +127,11 @@ int main()
 
     if (alocated_bytes > 0)
     {
-
       char *trimmed = trimwhitespace(line);
 
       if (trimmed[0] == '\n' || trimmed[0] == '\0')
       {
+        free(line);
         continue;
       }
 
@@ -168,7 +149,6 @@ int main()
       words[0] = (char *)malloc(strlen(firstToken));
 
       strcpy(words[0], firstToken);
-      printf("%s\n", words[0]);
 
       for (int i = 1; i < amountOfWords; i++)
       {
@@ -176,38 +156,14 @@ int main()
         words[i] = (char *)malloc(strlen(token));
 
         strcpy(words[i], token);
-        // printf("%s\n", words[i]);
       }
 
       words[amountOfWords + 1] = NULL;
-
-      for (int i = 0; i <= amountOfWords; i++)
-      {
-        printf("%s\n", words[i]);
-      }
-
       spawn(words[0], words);
-
-      // char *words = getWords(trimmed);
-      // printf("words: %d\n", words);
-
-      // int value = atoi(line);
-      // char arr[value];
-      // printf("no error\n");
-      // arr[0] = 'a';
-      // printf("%c", arr[0]);
-
-      printf("\nread %zd chars from stdin, allocated %zd bytes for line : %s\n", chars_read, alocated_bytes, line);
     }
 
     free(line); /* free memory allocated by getline */
   }
-
-  // /* Gera um processo filho executando o comando "ls".  Ignore o
-  //    id do processo filho retornado.  */
-  // spawn ("ls", arg_list);
-
-  // printf ("o programa principal terminou\n");
 
   return 0;
 }

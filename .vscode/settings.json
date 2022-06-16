@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "*.gdst": "xml",
+    "string.h": "c"
+  }
+}
