@@ -1,72 +1,177 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include <stdint.h>
 
-#define N 4          // Matrix NxN
+#define N 100        // Matrix NxN
 #define MAX_VALUE 10 // Max value in rand
 
-void initializeMatrix(int matrix[N][N])
+struct initializeRandomMatrixParameters
 {
-  for (int i = 0; i < N; i++)
+  intptr_t matrix[N][N];
+};
+
+void *initializeRandomMatrix(void *parameters)
+{
+  struct initializeRandomMatrixParameters *p = (struct initializeRandomMatrixParameters *)parameters;
+
+  for (intptr_t i = 0; i < N; i++)
   {
-    for (int j = 0; j < N; j++)
+    for (intptr_t j = 0; j < N; j++)
     {
-      matrix[i][j] = rand() % MAX_VALUE;
+      p->matrix[i][j] = rand() % MAX_VALUE;
     }
   }
 }
 
-void print(int matrix[N][N])
+void initializeMatrixFromOther(intptr_t matrix1[N][N], intptr_t matrix2[N][N])
 {
-  for (int i = 0; i < N; i++)
+  for (intptr_t i = 0; i < N; i++)
   {
-    for (int j = 0; j < N; j++)
+    for (intptr_t j = 0; j < N; j++)
     {
-      printf("%d\t", matrix[i][j]);
+      matrix1[i][j] = matrix2[i][j];
+    }
+  }
+}
+
+void print(intptr_t matrix[N][N])
+{
+  for (intptr_t i = 0; i < N; i++)
+  {
+    for (intptr_t j = 0; j < N; j++)
+    {
+      printf("%ld\t", matrix[i][j]);
     }
     printf("\n");
   }
 }
 
-int multiplyMatrixLineColumn(int line, int column, int matrix1[N][N], int matrix2[N][N])
+void writeMatrixIntoFile(intptr_t matrix[N][N], FILE *fptr)
 {
-  int result = 0;
-  for (int k = 0; k < N; k++)
+  for (intptr_t i = 0; i < N; i++)
   {
-    result += matrix1[line][k] * matrix2[k][column];
-  }
+    for (intptr_t j = 0; j < N; j++)
+    {
+      fprintf(fptr, "%ld ", matrix[i][j]);
+    }
 
-  return result;
-}
-
-void iterateOverColumn(int line, int matrix1[N][N], int matrix2[N][N], int result[N][N])
-{
-  for (int column = 0; column < N; column++)
-  {
-    result[line][column] = multiplyMatrixLineColumn(line, column, matrix1, matrix2);
+    fprintf(fptr, "\n");
   }
 }
 
-int main(void)
+struct multiplyMatrixLineColumnParameters
 {
-  int matrix1[N][N];
-  int matrix2[N][N];
-  int result[N][N];
+  intptr_t line;
+  intptr_t column;
+  intptr_t matrix1[N][N];
+  intptr_t matrix2[N][N];
+};
 
-  initializeMatrix(matrix1);
-  printf("Matriz 1\n");
-  print(matrix1);
+void *multiplyMatrixLineColumn(void *parameters)
+{
+  intptr_t result = 0;
+  struct multiplyMatrixLineColumnParameters *p = (struct multiplyMatrixLineColumnParameters *)parameters;
 
-  initializeMatrix(matrix2);
-  printf("\nMatriz 2\n");
-  print(matrix2);
-
-  for (int line = 0; line < N; line++)
+  for (intptr_t k = 0; k < N; k++)
   {
-    iterateOverColumn(line, matrix1, matrix2, result);
+    result += p->matrix1[p->line][k] * p->matrix2[k][p->column];
   }
 
-  printf("\nResult\n");
-  print(result);
+  return (void *)result;
+}
+
+struct iterateOverColumnParameters
+{
+  intptr_t line;
+  intptr_t matrix1[N][N];
+  intptr_t matrix2[N][N];
+  intptr_t result[N][N];
+};
+
+void *iterateOverColumn(void *parameters)
+{
+  struct iterateOverColumnParameters *p = (struct iterateOverColumnParameters *)parameters;
+
+  for (intptr_t column = 0; column < N; column++)
+  {
+    struct multiplyMatrixLineColumnParameters params;
+    params.line = p->line;
+    params.column = column;
+
+    initializeMatrixFromOther(params.matrix1, p->matrix1);
+    initializeMatrixFromOther(params.matrix2, p->matrix2);
+
+    pthread_t thread;
+    intptr_t value;
+
+    pthread_create(&thread, NULL, &multiplyMatrixLineColumn, &params);
+    pthread_join(thread, (void *)&value);
+
+    p->result[p->line][column] = value;
+  }
+}
+
+intptr_t main(void)
+{
+
+  struct initializeRandomMatrixParameters randomMatrix1;
+  pthread_t matrix1Thread;
+  pthread_create(&matrix1Thread, NULL, &initializeRandomMatrix, &randomMatrix1);
+
+  pthread_t matrix2Thread;
+  struct initializeRandomMatrixParameters randomMatrix2;
+  pthread_create(&matrix2Thread, NULL, &initializeRandomMatrix, &randomMatrix2);
+
+  pthread_join(matrix1Thread, NULL);
+  pthread_join(matrix2Thread, NULL);
+
+  printf("As duas matrizes foram criadas randomicamente\n");
+
+  intptr_t result[N][N];
+
+  for (intptr_t line = 0; line < N; line++)
+  {
+    printf("Calculando para a linha \"%ld\"\n", line);
+
+    struct iterateOverColumnParameters params;
+    params.line = line;
+
+    initializeMatrixFromOther(params.matrix1, randomMatrix1.matrix);
+    initializeMatrixFromOther(params.matrix2, randomMatrix2.matrix);
+    initializeMatrixFromOther(params.result, result);
+
+    pthread_t thread;
+
+    pthread_create(&thread, NULL, &iterateOverColumn, &params);
+    pthread_join(thread, NULL);
+
+    initializeMatrixFromOther(result, params.result);
+  }
+
+  printf("A matriz resultante foi calculada\n");
+
+  FILE *fptr;
+  fptr = fopen("./resultado.txt", "w");
+
+  if (fptr == NULL)
+  {
+    printf("Error!");
+    exit(1);
+  }
+
+  fprintf(fptr, "Matriz 1\n");
+  writeMatrixIntoFile(randomMatrix1.matrix, fptr);
+
+  fprintf(fptr, "\nMatriz 2\n");
+  writeMatrixIntoFile(randomMatrix2.matrix, fptr);
+
+  fprintf(fptr, "\nResultado\n");
+  writeMatrixIntoFile(result, fptr);
+
+  fclose(fptr);
+
+  printf("O resultado foi escrito no arquivo!\n");
 
   return 0;
 }

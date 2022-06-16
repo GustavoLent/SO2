@@ -1,6 +1,7 @@
 {
   "files.associations": {
     "*.gdst": "xml",
-    "string.h": "c"
+    "string.h": "c",
+    "pthread.h": "c"
   }
 }
