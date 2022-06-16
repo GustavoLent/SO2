@@ -27,6 +27,25 @@ void print(int matrix[N][N])
   }
 }
 
+int multiplyMatrixLineColumn(int line, int column, int matrix1[N][N], int matrix2[N][N])
+{
+  int result = 0;
+  for (int k = 0; k < N; k++)
+  {
+    result += matrix1[line][k] * matrix2[k][column];
+  }
+
+  return result;
+}
+
+void iterateOverColumn(int line, int matrix1[N][N], int matrix2[N][N], int result[N][N])
+{
+  for (int column = 0; column < N; column++)
+  {
+    result[line][column] = multiplyMatrixLineColumn(line, column, matrix1, matrix2);
+  }
+}
+
 int main(void)
 {
   int matrix1[N][N];
@@ -41,16 +60,9 @@ int main(void)
   printf("\nMatriz 2\n");
   print(matrix2);
 
-  for (int i = 0; i < N; i++)
+  for (int line = 0; line < N; line++)
   {
-    for (int j = 0; j < N; j++)
-    {
-      result[i][j] = 0;
-      for (int k = 0; k < N; k++)
-      {
-        result[i][j] += matrix1[i][k] * matrix2[k][j];
-      }
-    }
+    iterateOverColumn(line, matrix1, matrix2, result);
   }
 
   printf("\nResult\n");
