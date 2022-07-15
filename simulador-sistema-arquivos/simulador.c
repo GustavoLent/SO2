@@ -4,16 +4,18 @@
 // Trabalho 02 - Simulador de sistema de arquivos
 // Sistemas Operacionais II - Davi Duarte de Paula
 
+// alÃ´
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 
-int mkdir_exec (char *name, char *size); // Criar diretório (nome)
+int mkdir_exec (char *name, char *size); // Criar diretï¿½rio (nome)
 int mkfile_exec(char *name, char *size); // Criar arquivo (nome, tamanho)
-int rmdir_exec(char *name, char *size); // Excluir um diretório (nome)
+int rmdir_exec(char *name, char *size); // Excluir um diretï¿½rio (nome)
 int rmfile_exec(char *name, char *size); // RMFILE: Excluir um arquivo (nome)
-int ls_exec(char *name, char *size); // LS: Listar arquivos e diretórios
+int ls_exec(char *name, char *size); // LS: Listar arquivos e diretï¿½rios
 int showset_exec(char *name, char *size); // SHOWSET: Mostrar setores ocupados pelo arquivo (nome)
 int lset_exec(char *name, char *size); // LSET: Mostrar mapa de setores livres e ocupados
 int help_exec(char *name, char *size); // HELP: Exibir o guia de ajuda
