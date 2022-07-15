@@ -6,7 +6,7 @@
 - [ ] Criar 256 setores com 512 bytes cada
 - [ ] Ocupar os 10 primeiros setores
 
-2. [1,0] O simulador deve permitir a alocação de arquivos de forma não contígua. Sugere-se usar uma tabela de alocação de blocos e um mapa de bits para gerenciar o espaço livre (a mesma estrutura pode ou não ser aproveitada para ambos os propósitos).
+2. [1,0] O simulador deve permitir a alocação de arquivos de forma não contígua. Sugere-se **usar uma tabela de alocação de blocos** e um mapa de bits para gerenciar o espaço livre (a mesma estrutura pode ou não ser aproveitada para ambos os propósitos).
 
 - [ ] Criar a tabela de ocupação de blocos / mapa de bits
 
