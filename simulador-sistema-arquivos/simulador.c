@@ -2,19 +2,8 @@
 	Sistemas Operacionais II - Davi Duarte de Paula
 	Trabalho 02 - Simulador de sistema de arquivos
 
-	Gustavo Lima Lent & José Roberto Fernandes Russino
+	Gustavo Lima Lent & Jose Roberto Fernandes Russino
 	Primeiro semestre de 2022
-
-	-- Comandos:
-	- mkdir:		Criar diretório (nome)
-	- mkfile:	Criar arquivo (nome, tamanho)
-	- rmdir:		Excluir um diretório (nome)
-	- rmfile:	Excluir um arquivo (nome)
-	- ls:			Listar arquivos e diretórios
-	- showset	Mostrar setores ocupados pelo arquivo (nome)
-	- lset			Mostrar mapa de setores livres e ocupados
-	- help			Exibir o guia de ajuda
-	- exit			Encerrar o terminal
 */
 
 #include <stdio.h>
@@ -83,41 +72,6 @@ FOLDER_CONTENT newFolderContent()
 	fc.address = FOLDER_CONTENT_ADDRESS_NULL;
 
 	return fc;
-}
-
-int mkfile_exec(char *name, char *size)
-{
-	return 0;
-}
-
-int rmdir_exec(char *name, char *size)
-{
-	return 0;
-}
-
-int rmfile_exec(char *name, char *size)
-{
-	return 0;
-}
-
-int ls_exec(char *name, char *size)
-{
-	return 0;
-}
-
-int lset_exec(char *name, char *size)
-{
-	return 0;
-}
-
-int help_exec(char *name, char *size)
-{
-	return 1;
-}
-
-int exit_exec(char *name, char *size)
-{
-	return 0;
 }
 
 // Helper functions
@@ -336,7 +290,8 @@ int createSubdirOnDirectory(
 		return -1;
 	}
 
-	char data[FOLDER_CONTENT_USED_BYTES] = {''};
+	//char data[FOLDER_CONTENT_USED_BYTES] = {''};
+	char data[FOLDER_CONTENT_USED_BYTES];
 	data[0] = FOLDER_CONTENT_TYPE_FOLDER; // Set type as DIRECTORY
 
 	int nameOffset = 1;
@@ -475,7 +430,7 @@ int mkdir(
 
 		int res = createSubdirOnDirectory(diskPointer, ROOT_DIR_SECTOR_OFFSET, newdirName, sectorsAlocationTable, sectorsAlocationTableSize);
 
-		printf("after mkdir: %s\n", diskPointer->sectors[9].bytes);
+		printf("after mkdir: %s\n", diskPointer->sectors[8].bytes);
 
 		return res;
 	}
@@ -543,7 +498,18 @@ int main()
 		split(args, MAX_ARGS, line, " ");
 
 		// Identify the command
-		if (strcmp(args[0], "showset") == 0)
+		if (strcmp(args[0], "help") == 0)
+		{
+			printf("\n");
+			printf("mkdir - Criar diretorio (nome)\n");
+			printf("showset - Mostrar mapa de setores livres e ocupados\n");
+			printf("help - Exibir o guia de ajuda\n");
+			printf("clear - Limpar a tela\n");
+			printf("exit - Encerrar o terminal\n");
+			printf("\n");
+
+		}
+		else if (strcmp(args[0], "showset") == 0)
 		{
 			showset(sectorsAlocationTable, DISK_AMOUNT_OF_SECTORS);
 		}
@@ -569,7 +535,7 @@ int main()
 		}
 		else /* default: */
 		{
-			printf("%s Error: command \"%s\"not found", INPUT_LABEL, args[0]);
+			printf("%s Error: command \"%s\" not found, try type \"help\"\n", INPUT_LABEL, args[0]);
 		}
 
 		clearArray(args, MAX_ARGS);
