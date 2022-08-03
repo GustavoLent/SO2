@@ -3,12 +3,12 @@
 
 1. [1,0] Simular um disco com 256 setores de 512 bytes. Considere que os 10 primeiros setores são ocupados pelo setor de boot, sistema de arquivos e o diretório raiz, ficando os demais setores disponíveis para dados do usuário.
 
-- [ ] Criar 256 setores com 512 bytes cada
+- [x] Criar 256 setores com 512 bytes cada
 - [ ] Ocupar os 10 primeiros setores
 
 2. [1,0] O simulador deve permitir a alocação de arquivos de forma não contígua. Sugere-se **usar uma tabela de alocação de blocos** e um mapa de bits para gerenciar o espaço livre (a mesma estrutura pode ou não ser aproveitada para ambos os propósitos).
 
-- [ ] Criar a tabela de ocupação de blocos / mapa de bits
+- [x] Criar a tabela de ocupação de blocos / mapa de bits
 
 3. [0,8] O simulador deve permitir a criação de diretórios e subdiretórios com um comando criad até o mínimo de 8 níveis. Cada diretório pode conter vários subdiretórios. Cada diretório/subdiretório ocupa um setor do disco.
 Sugestão de sintaxe: criad caminho\nome_do_diretorio
@@ -51,8 +51,8 @@ Sugestão de sintaxe: verset caminho\nome_do_arquivo
 
 9. [1,0] O simulador deve oferecer um comando mapa que mostre graficamente quais são os setores ocupados e quais são os setores livres.
 
-- [ ] Exibir o mapa de bits (já implementado no item 2)
-- [ ] LISTASET: 
+- [x] Exibir o mapa de bits (já implementado no item 2)
+- [x] LISTASET --> showset
 
 10. [1,0] O simulador deve oferecer um comando árvore que mostra graficamente a árvore de diretórios do sistema de arquivos.
 
